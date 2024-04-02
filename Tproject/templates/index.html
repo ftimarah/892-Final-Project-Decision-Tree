@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Cross Continent Transportation System</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="{{ url_for('static', filename='app.js') }}"></script>
+</head>
+<body>
+    <h1>Cross Continent Transportation System</h1>
+    <form id="transportationForm">
+        <label for="startLocation">Start Location:</label>
+        <select id="startLocation" name="startLocation">
+            <option value="New York City, US">New York City, US</option>
+            <option value="Tokyo, JP">Tokyo, JP</option>
+            <option value="London, UK">London, UK</option>
+            <option value="Los Angeles, US">Los Angeles, US</option>
+            <option value="Cairo, EG">Cairo, EG</option>
+            <option value="Paris, FR">Paris, FR</option>
+        </select><br /><br />
+        <label for="endLocation">End Location:</label>
+        <select id="endLocation" name="endLocation">
+            <option value="New York City, US">New York City, US</option>
+            <option value="Tokyo, JP">Tokyo, JP</option>
+            <option value="London, UK">London, UK</option>
+            <option value="Los Angeles, US">Los Angeles, US</option>
+            <option value="Cairo, EG">Cairo, EG</option>
+            <option value="Paris, FR">Paris, FR</option>
+        </select><br /><br />
+        <label for="distance">Distance (km):</label>
+        <input type="number" id="distance" name="distance" required /><br /><br />
+        <label for="urgency">Urgency:</label>
+        <select id="urgency" name="urgency">
+            <option value="High">High</option>
+            <option value="Medium">Medium</option>
+            <option value="Low">Low</option>
+        </select><br /><br />
+        <button type="button" id="predictButton">Predict</button> <!-- Changed type to "button" -->
+    </form>
+
+    <div id="predictionResult" style="display: none;">
+        <h2>Prediction Result</h2>
+        <p>
+            Transportation Method: <span id="predictedMethod"> Cost {{predicted_method}} </span>
+        </p>
+        <p>
+            Transportation Cost: <span id="transportationCost"></span>
+        </p>
+        <p>
+            Optimized Method: <span id="optimizedMethod"></span>
+        </p>
+        <a href="/">Back to Home</a>
+    </div>
+
+    <script>
+        $(document).ready(function () {
+            $('#predictButton').click(function () {
+                $.ajax({
+                    url: '/predict',
+                    type: 'POST',
+                    contentType: 'application/json',
+                    data: JSON.stringify({
+                        startLocation: $('#startLocation').val(),
+                        endLocation: $('#endLocation').val(),
+                        distance: $('#distance').val(),
+                        urgency: $('#urgency').val()
+                    }),
+                    success: function (response) {
+                        $('#predictedMethod').text(response.predicted_method);
+                        $('#transportationCost').text(response.transportation_cost);
+                        $('#optimizedMethod').text(response.optimized_method);
+                        $('#predictionResult').show();
+                        console.log("predicted_method " + response.predicted_method)
+                    },
+                    error: function (xhr, status, error) {
+                        console.error('Error:', error);
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+</html>
