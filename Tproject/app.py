@@ -11,9 +11,29 @@ model = joblib.load('decision_tree_model.joblib')
 
 # Load the column names used during training for reference
 column_names = joblib.load('column_names.joblib')
+# print("Column names:", column_names)
+
+# Load the dataset
+dataset = pd.read_csv('transportation_dataset.csv')
+
+# Print the column names in the dataset
+# print("Actual column names in the dataset:", dataset.columns.tolist())
+
+# Update the column_names variable to include missing columns and align the order
+column_names = [
+    'Distance (km)', 'Transportation Cost ($)', 'Fuel Efficiency (km/l)', 'Emissions (gCO2/km)',
+    'Start Location_Cairo, EG', 'Start Location_London, UK', 'Start Location_Los Angeles, US',
+    'Start Location_New York City, US', 'Start Location_Paris, FR', 'Start Location_Tokyo, JP',
+    'End Location_Cairo, EG', 'End Location_London, UK', 'End Location_Los Angeles, US',
+    'End Location_New York City, US', 'End Location_Paris, FR', 'End Location_Tokyo, JP',
+    'Urgency_High', 'Urgency_Low', 'Urgency_Medium', 'Transportation Method', 'Order ID'
+]
 
 # Define a function to preprocess input data and make predictions
 def predict_transportation(data):
+
+    # print("Received data:", data)
+
     # Convert the input JSON data into a DataFrame
     features = pd.DataFrame(data, index=[0])
 
