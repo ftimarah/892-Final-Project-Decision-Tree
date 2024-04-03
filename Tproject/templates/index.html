@@ -1,11 +1,10 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Cross Continent Transportation System</title>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <script src="{{ url_for('static', filename='app.js') }}"></script>
 </head>
 <body>
     <h1>Cross Continent Transportation System</h1>
@@ -36,16 +35,19 @@
             <option value="Medium">Medium</option>
             <option value="Low">Low</option>
         </select><br /><br />
-        <button type="button" id="predictButton">Predict</button> <!-- Changed type to "button" -->
+        <button type="button" id="predictButton">Predict</button>
     </form>
 
     <div id="predictionResult" style="display: none;">
         <h2>Prediction Result</h2>
         <p>
-            Transportation Method: <span id="predictedMethod"> Cost {{predicted_method}} </span>
+            Transportation Method: <span id="predictedMethod"></span>
         </p>
         <p>
-            Transportation Cost: <span id="transportationCost"></span>
+            Transportation Cost: <span id="transportationCost"></span> Canadian Dollars
+        </p>
+        <p>
+            Estimated Delivery Date: <span id="estimatedDate"></span>
         </p>
         <p>
             Optimized Method: <span id="optimizedMethod"></span>
@@ -56,22 +58,26 @@
     <script>
         $(document).ready(function () {
             $('#predictButton').click(function () {
+                // Collect form data
+                var formData = {
+                    startLocation: $('#startLocation').val(),
+                    endLocation: $('#endLocation').val(),
+                    distance: $('#distance').val(),
+                    urgency: $('#urgency').val()
+                };
+
+                // Send POST request to Flask server
                 $.ajax({
                     url: '/predict',
                     type: 'POST',
                     contentType: 'application/json',
-                    data: JSON.stringify({
-                        startLocation: $('#startLocation').val(),
-                        endLocation: $('#endLocation').val(),
-                        distance: $('#distance').val(),
-                        urgency: $('#urgency').val()
-                    }),
+                    data: JSON.stringify(formData),
                     success: function (response) {
                         $('#predictedMethod').text(response.predicted_method);
                         $('#transportationCost').text(response.transportation_cost);
+                        $('#estimatedDate').text(response.estimated_date);
                         $('#optimizedMethod').text(response.optimized_method);
                         $('#predictionResult').show();
-                        console.log("predicted_method " + response.predicted_method)
                     },
                     error: function (xhr, status, error) {
                         console.error('Error:', error);
@@ -82,3 +88,4 @@
     </script>
 </body>
 </html>
+

@@ -4,20 +4,13 @@ from sklearn.tree import DecisionTreeClassifier
 import joblib
 import datetime
 
-app = Flask(__name__, static_folder='static', template_folder='templates')
+app = Flask(__name__, template_folder = 'templates')
 
 # Load the trained decision tree model
 model = joblib.load('decision_tree_model.joblib')
 
 # Load the column names used during training for reference
 column_names = joblib.load('column_names.joblib')
-# print("Column names:", column_names)
-
-# Load the dataset
-dataset = pd.read_csv('transportation_dataset.csv')
-
-# Print the column names in the dataset
-# print("Actual column names in the dataset:", dataset.columns.tolist())
 
 # Update the column_names variable to include missing columns and align the order
 column_names = [
@@ -31,9 +24,6 @@ column_names = [
 
 # Define a function to preprocess input data and make predictions
 def predict_transportation(data):
-
-    # print("Received data:", data)
-
     # Convert the input JSON data into a DataFrame
     features = pd.DataFrame(data, index=[0])
 
@@ -47,14 +37,11 @@ def predict_transportation(data):
     predicted_method = model.predict(features_encoded)
 
     # Calculate transportation cost based on distance and urgency
-    distance = data['distance']
+    distance = int(data['distance'])
     urgency = data['urgency']
-    distance = int(distance)
     
     if urgency == 'High':
-        print("distance type int and value ", isinstance(distance, int), distance)
         transportation_cost = distance * 0.05
-        
     elif urgency == 'Medium':
         transportation_cost = distance * 0.03
     else:
@@ -64,7 +51,6 @@ def predict_transportation(data):
 
 # Function to estimate delivery dates
 def estimate_delivery_date(distance, urgency):
-    # Sample logic to estimate delivery dates based on distance and urgency
     distance = int(distance)
     days_per_km = 0.1  # Sample average delivery days per kilometer
     if urgency == 'High':
@@ -76,7 +62,6 @@ def estimate_delivery_date(distance, urgency):
 
 # Function to optimize transportation means
 def optimize_transportation_method(destination):
-    # Sample logic to optimize transportation method based on destination
     if 'US' in destination:
         return 'Truck'
     elif 'JP' in destination:
@@ -87,72 +72,31 @@ def optimize_transportation_method(destination):
         return 'Train'
 
 # Define routes
-
 @app.route('/')
 def home():
     return render_template('index.html')
 
 @app.route('/predict', methods=['POST'])
 def predict():
-    # Get input data from JSON request
     data = request.get_json()
-    print("data is ", data)
+    
     # Make prediction
     predicted_method, transportation_cost = predict_transportation(data)
-    print("predicted method, transportation_cost ", predicted_method, transportation_cost)
     
     # Estimate delivery date
     estimated_date = estimate_delivery_date(data['distance'], data['urgency'])
-    print("Estimated date ", estimated_date)
     
     # Optimize transportation method
     optimized_method = optimize_transportation_method(data['endLocation'])
-
-    print("optimized method ", optimized_method)
     
-    # Render the result.html template with prediction results
-    render = render_template('result.html', 
-                           predicted_method=predicted_method, 
-                           transportation_cost=transportation_cost, 
-                           estimated_date=estimated_date.strftime('%Y-%m-%d %H:%M:%S'),
-                           optimized_method=optimized_method
-                           )
-
-    print("render", render)
-    
-    return render
-# @app.route('/result')
-
-# def result():
-#     # This route is just a placeholder to render the result.html template
-#     # The actual prediction results are passed from the '/predict' route
-#     return render_template('result.html')
-
-
-# @app.route('/predict', methods=['POST'])
-# def predict():
-#     # Get input data from JSON request
-#     data = request.get_json()
-#     print("data is ", data)
-#     # Make prediction
-#     predicted_method, transportation_cost = predict_transportation(data)
-#     print("predicted method, transportation_cost ", predicted_method, transportation_cost)
-    
-#     # Estimate delivery date
-#     estimated_date = estimate_delivery_date(data['distance'], data['urgency'])
-#     print("Estimated date ", estimated_date)
-    
-#     # Optimize transportation method
-#     optimized_method = optimize_transportation_method(data['endLocation'])
-
-#     print("optimized method ", optimized_method)
-    
-#     # Render the result.html template with prediction results
-#     return render_template('result.html', 
-#                            predicted_method=predicted_method, 
-#                            transportation_cost=transportation_cost, 
-#                            estimated_date=estimated_date.strftime('%Y-%m-%d %H:%M:%S'),
-#                            optimized_method=optimized_method)
+    # Return prediction results as JSON
+    return jsonify({
+        'predicted_method': predicted_method,
+        'transportation_cost': round(transportation_cost, 2),
+        'estimated_date': estimated_date.strftime('%Y-%m-%d %H:%M:%S'),
+        'optimized_method': optimized_method
+    })
 
 if __name__ == '__main__':
-    app.run(debug=True, port=3000)
+    app.run(debug=True, port=5000)
+
