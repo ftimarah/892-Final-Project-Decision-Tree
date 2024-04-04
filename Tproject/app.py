@@ -105,7 +105,7 @@ if __name__ == '__main__':
 
 import os
 from fastapi import FastAPI, Request
-from fastapi.responses import HTMLResponse
+from fastapi.responses import HTMLResponse, JSONResponse
 from fastapi.templating import Jinja2Templates
 import pandas as pd
 import joblib
@@ -134,7 +134,6 @@ column_names = [
     'End Location_New York City, US', 'End Location_Paris, FR', 'End Location_Tokyo, JP',
     'Urgency_High', 'Urgency_Low', 'Urgency_Medium', 'Transportation Method', 'Order ID'
 ]
-
 
 # Define a function to preprocess input data and make predictions
 def predict_transportation(data):
@@ -192,18 +191,33 @@ async def home(request: Request):
 
 @app.post("/predict")
 async def predict(request: Request):
-    data = await request.form()
-    
-    # Make prediction
-    predicted_method, transportation_cost = predict_transportation(data)
-    
+    data = await request.json()
+
+    # Ensure all required fields are present
+    required_fields = ['startLocation', 'endLocation', 'distance', 'urgency']
+    for field in required_fields:
+        if field not in data:
+            return JSONResponse(status_code=400, content={"error": f"Missing '{field}' field"})
+
+    # Calculate transportation cost based on distance and urgency
+    distance = float(data['distance'])
+    urgency = data['urgency']
+    if urgency == 'High':
+        transportation_cost = distance * 0.05
+    elif urgency == 'Medium':
+        transportation_cost = distance * 0.03
+    else:
+        transportation_cost = distance * 0.02
+
+    # Make a dummy prediction for demonstration purposes
+    predicted_method = "Truck"
+
     # Estimate delivery date
-    estimated_date = estimate_delivery_date(data['distance'], data['urgency'])
+    estimated_date = datetime.datetime.now() + datetime.timedelta(days=distance * 0.1)
     
     # Optimize transportation method
-    optimized_method = optimize_transportation_method(data['endLocation'])
-    
-    # Return prediction results
+    optimized_method = "Truck"
+
     return {
         'predicted_method': predicted_method,
         'transportation_cost': round(transportation_cost, 2),
