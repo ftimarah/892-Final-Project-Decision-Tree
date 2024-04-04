@@ -199,25 +199,34 @@ async def predict(request: Request):
         if field not in data:
             return JSONResponse(status_code=400, content={"error": f"Missing '{field}' field"})
 
-    # Calculate transportation cost based on distance and urgency
-    distance = float(data['distance'])
-    urgency = data['urgency']
-    if urgency == 'High':
-        transportation_cost = distance * 0.05
-    elif urgency == 'Medium':
-        transportation_cost = distance * 0.03
-    else:
-        transportation_cost = distance * 0.02
+    # # Calculate transportation cost based on distance and urgency
+    # distance = float(data['distance'])
+    # urgency = data['urgency']
+    # if urgency == 'High':
+    #     transportation_cost = distance * 0.05
+    # elif urgency == 'Medium':
+    #     transportation_cost = distance * 0.03
+    # else:
+    #     transportation_cost = distance * 0.02
 
-    # Make a dummy prediction for demonstration purposes
-    predicted_method = "Truck"
+    # # Make a dummy prediction for demonstration purposes
+    # predicted_method = "Truck"
 
     # Estimate delivery date
-    estimated_date = datetime.datetime.now() + datetime.timedelta(days=distance * 0.1)
+    # estimated_date = datetime.datetime.now() + datetime.timedelta(days=distance * 0.1)
+    
+    # # Optimize transportation method
+    # optimized_method = "Truck"
+
+    # Make prediction
+    predicted_method, transportation_cost = predict_transportation(data)
+    
+    # Estimate delivery date
+    estimated_date = estimate_delivery_date(data['distance'], data['urgency'])
     
     # Optimize transportation method
-    optimized_method = "Truck"
-
+    optimized_method = optimize_transportation_method(data['endLocation'])
+    
     return {
         'predicted_method': predicted_method,
         'transportation_cost': round(transportation_cost, 2),
