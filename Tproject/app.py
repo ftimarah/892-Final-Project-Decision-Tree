@@ -6,8 +6,6 @@ import pandas as pd
 import joblib
 import datetime
 
-# Jus doin what I do
-# Don't you fudgin start wit me rn
 # Define the directory path to the templates folder
 templates_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), "templates")
 
